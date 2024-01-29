@@ -43,6 +43,7 @@ contract Agreement is Structure, IAgreement {
         require(contractInstance.isCPO(CPOaddress), "203");
         require(agreementParameters.maxRate.precision == PRECISION, "506");
         require(agreementParameters.maxRate.value > 0, "507");
+        require(agreementParameters.lengthInDays > 0, "508");
 
         Agreement memory currentAgreement = contractInstance.getAgreement(EVaddress, CPOaddress);
         if ( currentAgreement.EV != address(0) && !currentAgreement.accepted && currentAgreement.endDate > block.timestamp ) {
@@ -58,7 +59,7 @@ contract Agreement is Structure, IAgreement {
             CPO: CPOaddress,
             accepted: false,
             startDate: block.timestamp,
-            endDate: block.timestamp + 1 weeks,
+            endDate: block.timestamp + agreementParameters.lengthInDays * 1 days,
             parameters: agreementParameters
         });
 

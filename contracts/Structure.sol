@@ -63,6 +63,7 @@ interface Structure {
         PrecisionNumber maxRate;
         bool onlyRewneableEnergy;
         bool allowSmartCharging;
+        uint lengthInDays;
     }
 
     struct Connection {
