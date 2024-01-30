@@ -117,6 +117,15 @@ class EV extends Entity {
             this.getTime() + 60 * 60 * maxHours
         ).send();
     }
+    async scheduleSmartChargingExperiment(CSaddress, CPOaddress, nonce, maxHours = 1) {
+        return await this.contract.methods.scheduleSmartCharging(
+            this.account.address,
+            CSaddress,
+            CPOaddress,
+            this.wattHoursToWattSeconds(this.currentCharge),
+            this.getTime() + 60 * 60 * maxHours
+        ).send({nonce: nonce});
+    }
 
     async acceptSmartCharging(value, CSaddress, schemeId) {
         return await this.contract.methods.acceptSmartCharging(

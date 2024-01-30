@@ -88,8 +88,10 @@ if (true) {
         count++;
         console.log(count);
     });
-    for ( let i = 0; i < 2; i++ ) {
-        console.log("Scheduling smart charging...");
-        car.scheduleSmartCharging(station.account.address, operator.account.address);
+    const nonce_count = Number(await car.web3.eth.getTransactionCount(car.account.address));
+    console.log(nonce_count);
+    for ( let i = 0; i < 500; i++ ) {
+        console.log(i,"Scheduling smart charging...");
+        car.scheduleSmartChargingExperiment(station.account.address, operator.account.address, nonce_count+i);
     }
 }
