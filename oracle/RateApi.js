@@ -63,6 +63,9 @@ class RateApi {
             for ( let i = 0; i < size; i++ ) {
                 let index = i % json.length;
                 rates[i] = price_adjuster(json[index].SEK_per_kWh);
+                if ( rates[i] < 1 ) {
+                    rates[i] = 1;
+                }
             }
 
             return rates;

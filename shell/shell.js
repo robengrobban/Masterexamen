@@ -16,7 +16,7 @@ car.listen('Payment').on('data', log => {
     console.log("Payment: ", log.returnValues);
 });
 
-if (false) {
+if (true) {
     console.log("DEBUG EV: ", await car.getEV());
     console.log("DEBUG CPO: ", await operator.getCPO());
     console.log("DEBUG CS: ", await station.getCS());
@@ -136,7 +136,7 @@ if (false) {
 if (false) {
     // Calculate charging price
     //console.log(await car.estimateChargingPrice(station.account.address));
-    console.log(await car.getChargingScheme(station.account.address, operator2.account.address));
+    console.log(await car.getChargingScheme(station.account.address, operator.account.address));
 }
 if (false) {
     // Listenings
@@ -159,7 +159,7 @@ if (false) {
 
     // Request charging
     console.log("EV requests charging...");
-    await car.requestCharging(1000, station.account.address, operator2.account.address, car.getTime() + 30);
+    await car.requestCharging(1000, station.account.address, operator.account.address, car.getTime() + 30);
 }
 if (false) {
     // Listenings

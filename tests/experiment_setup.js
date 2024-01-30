@@ -88,7 +88,7 @@ if (true) {
         count++;
         console.log(count);
     });
-    for ( let i = 0; i < 100; i++ ) {
+    for ( let i = 0; i < 2; i++ ) {
         console.log("Scheduling smart charging...");
         car.scheduleSmartCharging(station.account.address, operator.account.address);
     }
