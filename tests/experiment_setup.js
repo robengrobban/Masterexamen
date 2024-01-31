@@ -83,8 +83,13 @@ if (false) {
 
 if (true) {
     let count = 0;
-    car.listen("SmartChargingScheduled").on('data', async log => {
+    /*car.listen("SmartChargingScheduled").on('data', async log => {
         //console.log("EV new smart charging schedule...", log.returnValues);
+        count++;
+        console.log(count);
+    });*/
+    station.listen('ChargingRequested').on('data', async log => {
+        //console.log("CS charging request ", log.returnValues);
         count++;
         console.log(count);
     });
@@ -95,7 +100,9 @@ if (true) {
             await new Promise(r => setTimeout(r, 1000));
             console.log("Just slept for 1s");
         }
-        console.log(i,"Scheduling smart charging...");
-        car.scheduleSmartChargingExperiment(station.account.address, operator.account.address, nonce_count+i);
+        //console.log(i,"Scheduling smart charging...");
+        //car.scheduleSmartChargingExperiment(station.account.address, operator.account.address, nonce_count+i);
+        console.log(i,"EV requests charging...");
+        car.requestChargingExperiment(1000, station.account.address, operator.account.address, car.getTime() + 30, nonce_count+i);
     }
 }

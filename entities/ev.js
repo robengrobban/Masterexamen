@@ -84,6 +84,16 @@ class EV extends Entity {
             targetCharge
         ).send({value: value});
     }
+    async requestChargingExperiment(value, CSaddress, CPOaddress, startTime, nonce, targetCharge = this.wattHoursToWattSeconds(this.maxCapacity)) {
+        return await this.contract.methods.requestCharging(
+            this.account.address,
+            CSaddress,
+            CPOaddress,
+            startTime,
+            this.wattHoursToWattSeconds(this.currentCharge),
+            targetCharge
+        ).send({value: value, nonce: nonce});
+    }
 
     async stopCharging(CSaddress) {
         return await this.contract.methods.stopCharging(
