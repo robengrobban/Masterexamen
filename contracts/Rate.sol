@@ -12,10 +12,10 @@ contract Rate is Structure, IRate {
     /*
     * CONTRACT MANAGMENT
     */
-    address owner;
-    IContract contractInstance;
-    address contractAddress;
-    IOracle oracleInstance;
+    address private owner;
+    IContract private contractInstance;
+    address private contractAddress;
+    IOracle private oracleInstance;
 
     constructor () {
         owner = msg.sender;
@@ -33,13 +33,13 @@ contract Rate is Structure, IRate {
     * PUBLIC FUNCTIONS
     */
 
-    function setRates(address CPOaddress, bytes3 region, uint[RATE_SLOTS] calldata newRates, uint newRoaming, uint ratePrecision) public returns (Rate memory) {
+    function setRates(address CPOaddress, bytes32 region, uint[RATE_SLOTS] calldata newRates, uint newRoaming) public returns (Rate memory) {
         require(msg.sender == contractAddress, "102");
         require(tx.origin == CPOaddress, "202");
         require(contractInstance.isCPO(CPOaddress), "203");
         require(newRates.length == RATE_SLOTS, "801");
         require(newRoaming > 0, "805");
-        require(ratePrecision == PRECISION, "802");
+        //require(ratePrecision == PRECISION, "802");
 
         CPO memory cpo = contractInstance.getCPO(CPOaddress);
         require(!cpo.automaticRates, "806");
@@ -55,13 +55,12 @@ contract Rate is Structure, IRate {
             rate.startDate = getNextRateChangeAtTime(block.timestamp-RATE_CHANGE_IN_SECONDS);
             rate.current = newRates;
             rate.currentRoaming = newRoaming;
-            rate.precision = ratePrecision;
         }
         // There are existing rates.
         else if ( rate.next[0] == 0 ) {
-            if ( rate.precision != ratePrecision ) {
+            /*if ( rate.precision != ratePrecision ) {
                 revert("803");
-            }
+            }*/
             rate.next = newRates;
             rate.nextRoaming = newRoaming;
             rate.changeDate = getNextRateChangeAtTime(block.timestamp);
@@ -73,12 +72,12 @@ contract Rate is Structure, IRate {
         return rate;
     }
 
-    function nextRoaming(address CPOaddress, bytes3 region, uint newRoaming, uint roaminPrecision) public returns (Rate memory) {
+    function nextRoaming(address CPOaddress, bytes32 region, uint newRoaming) public returns (Rate memory) {
         require(msg.sender == contractAddress, "102");  
         require(tx.origin == CPOaddress, "202");
         require(contractInstance.isCPO(CPOaddress), "203");
         require(newRoaming > 0, "805");
-        require(roaminPrecision == PRECISION, "802");
+        //require(roaminPrecision == PRECISION, "802");
 
         CPO memory cpo = contractInstance.getCPO(CPOaddress);
         require(cpo.automaticRates, "808");

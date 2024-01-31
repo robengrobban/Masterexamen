@@ -27,19 +27,19 @@ uint constant PRECISION = 1000000000;           // Affects the precision on calc
 
 interface Structure {
     
-    struct PrecisionNumber {
+    /*struct PrecisionNumber {
         uint value;
         uint precision;
-    }
+    }*/
 
     struct CPO {
         address _address;
-        bytes5 name;
+        bytes32 name;
         bool automaticRates;
     }
     struct CS {
         address _address;
-        bytes3 region; // Region CS is in, affects rates/roaming
+        bytes32 region; // Region CS is in, affects rates/roaming
         uint powerDischarge; // Watt output
         bool hasRenewableEnergy; // If RES is available at this CS
         address cpo; // Connection to what CPO
@@ -60,7 +60,7 @@ interface Structure {
         AgreementParameters parameters;
     }
     struct AgreementParameters {
-        PrecisionNumber maxRate;
+        uint maxRatePrecision;
         bool onlyRewneableEnergy;
         bool allowSmartCharging;
         uint lengthInDays;
@@ -74,8 +74,7 @@ interface Structure {
     }
 
     struct Rate {
-        bytes3 region;
-        uint precision; // The selected precision for Rates. (INT calculation)
+        bytes32 region;
 
         uint[RATE_SLOTS] current; // Rate per Watt seconds
         uint currentRoaming; // Roaming rate per Watt seconds
@@ -85,10 +84,6 @@ interface Structure {
         uint nextRoaming; // The next roaming rates
         uint changeDate; // The date when the new rates are expected to change
 
-        //uint[RATE_SLOTS] historical; // What the last rate was
-        //uint historicalRoaming; // What the roaming last was
-        //uint historicalDate; // When the rates in historical started
-
         uint automaticNextRoaming; // The next roaming when the next automatic update happens.
     }
 
@@ -96,38 +91,38 @@ interface Structure {
         uint id;
 
         address CPOaddress; // Address of which CPO is used for rates
-        bool roaming; // If this charging scheme is of type roaming, 
+        bool roaming; // If this charging scheme is of type roaming
+        bool smartCharging; // True if the scheme originated from a smart charging request
 
         bool EVaccepted;
         bool CSaccepted;
-
         bool finished;
-        bool smartCharging; // True if the scheme originated from a smart charging request
 
-        uint targetCharge; // Watt seconds of target charge
-        uint outputCharge; // Watt seconds of output charge, if full scheme is used
+        //uint startCharge; // Watt seconds of start charge (debug)
+        //uint targetCharge; // Watt seconds of target charge (debug)
+        //uint outputCharge; // Watt seconds of output charge, if full scheme is used (debug)
 
-        uint startCharge; // Watt seconds of start charge
-        uint startDate; // Unix time for when charging starts
         uint chargeTime; // Seconds of time needed to charge EV
+        uint maxTime; // The maximum amount of time a scheme can run for in seconds (ends at agreement end or when new (unkown) rates start)
         uint activeTime; // Seconds of time CS is charging EV, based on user preferneces of max rates
         uint idleTime; // Seconds of time CS is not charging EV, based on user preferences of max rates
-        uint maxTime; // The maximum amount of time a scheme can run for in seconds (ends at agreement end or when new (unkown) rates start)
+
+        uint startDate; // Unix time for when charging starts
         uint endDate; // Unix time for when charging should end
         uint finishDate; // Unix time for when charing actually end
         
-        bytes3 region;
+        bytes32 region;
 
-        PrecisionNumber price;
+        uint pricePrecision;
         uint priceInWei;
 
-        PrecisionNumber roamingPrice;
+        uint roamingPricePrecision;
         uint roamingPriceInWei;
 
-        PrecisionNumber finalPrice;
+        uint finalPricePrecision;
         uint finalPriceInWei;
 
-        PrecisionNumber finalRoamingPrice;
+        uint finalRoamingPricePrecision;
         uint finalRoamingPriceInWei;
 
         uint slotsUsed;

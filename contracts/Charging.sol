@@ -11,9 +11,9 @@ contract Charging is Structure, ICharging {
     /*
     * CONTRACT MANAGMENT
     */
-    address owner;
-    IContract contractInstance;
-    address contractAddress;
+    address private owner;
+    IContract private contractInstance;
+    address private contractAddress;
 
     constructor () {
         owner = msg.sender;
@@ -30,7 +30,7 @@ contract Charging is Structure, ICharging {
     * VARIABLES
     */
 
-    uint nextSchemeId = 0;
+    uint private nextSchemeId = 0;
 
     /*
     * PUBLIC FUNCTIONS
@@ -97,8 +97,10 @@ contract Charging is Structure, ICharging {
 
         // Timeout
         if ( scheme.startDate < block.timestamp ) {
-            ChargingScheme memory deleted;
-            return deleted;
+            //ChargingScheme memory deleted;
+            //return deleted;
+            delete scheme;
+            return scheme;
         }
 
         // Everything good, accept charging
@@ -153,8 +155,8 @@ contract Charging is Structure, ICharging {
         require(targetCharge <= T.ev.maxCapacity, "709");
 
         ChargingScheme memory scheme;
-        scheme.startCharge = startCharge;
-        scheme.targetCharge = targetCharge;
+        //scheme.startCharge = startCharge;
+        //scheme.targetCharge = targetCharge;
         scheme.startDate = startDate;
         scheme.CPOaddress = CPOaddress;
 
@@ -243,8 +245,10 @@ contract Charging is Structure, ICharging {
         require(!contractInstance.isCharging(EVaddress, CSaddress), "702");
 
         if ( scheme.startDate < block.timestamp ) {
-            ChargingScheme memory deleted;
-            return deleted;
+            //ChargingScheme memory deleted;
+            //return deleted;
+            delete scheme;
+            return scheme;
         }
 
         // Check funds
@@ -272,8 +276,8 @@ contract Charging is Structure, ICharging {
         uint chargeTimeLeft = scheme.chargeTime;
         uint startDate = scheme.startDate;
         uint elapsedTime;
-        scheme.price.precision = PRECISION;
-        scheme.roamingPrice.precision = PRECISION;
+        //scheme.price.precision = PRECISION;
+        //scheme.roamingPrice.precision = PRECISION;
         uint index = 0;
         while ( chargeTimeLeft > 0 && elapsedTime < scheme.maxTime ) {
             
@@ -295,12 +299,12 @@ contract Charging is Structure, ICharging {
                 elapsedTime += timeInSlot; 
 
                 scheme.activeTime += timeInSlot;
-                scheme.outputCharge += T.cs.powerDischarge * timeInSlot;
+                //scheme.outputCharge += T.cs.powerDischarge * timeInSlot;
                 scheme.prices[index] = timeInSlot * currentRate * T.cs.powerDischarge;
                 scheme.roamingFees[index] = timeInSlot * C.roaming.currentRoaming * T.cs.powerDischarge;
 
-                scheme.price.value += scheme.prices[index];
-                scheme.roamingPrice.value += scheme.roamingFees[index];
+                scheme.pricePrecision += scheme.prices[index];
+                scheme.roamingPricePrecision += scheme.roamingFees[index];
             }
             else {
                 elapsedTime += timeInSlot; 
@@ -312,8 +316,8 @@ contract Charging is Structure, ICharging {
             index++;
         }
 
-        scheme.priceInWei = priceToWei(scheme.price);
-        scheme.roamingPriceInWei = priceToWei(scheme.roamingPrice);
+        scheme.priceInWei = priceToWei(scheme.pricePrecision);
+        scheme.roamingPriceInWei = priceToWei(scheme.roamingPricePrecision);
         
         scheme.endDate = startDate + elapsedTime;
         scheme.slotsUsed = index;
@@ -329,25 +333,11 @@ contract Charging is Structure, ICharging {
         
         uint nextRateSlot = getNextRateSlot(currentTime); // Unix time for when the next rate slot starts.
 
-        bool useSlot = currentRate <= agreement.parameters.maxRate.value;
+        bool useSlot = currentRate <= agreement.parameters.maxRatePrecision;
 
         uint timeInSlot = nextRateSlot - currentTime;
 
         return (useSlot, timeInSlot, currentRate);
-    }
-
-    function shouldUseSlot(uint currentRate, Agreement memory agreement, Rate memory rate) private pure returns (bool) {
-        PrecisionNumber memory maxRate = agreement.parameters.maxRate;
-
-        uint CPOprecision = rate.precision;
-        PrecisionNumber memory slotRate = PrecisionNumber({
-            value: currentRate,
-            precision: CPOprecision
-        });
-        
-        (maxRate, slotRate) = paddPrecisionNumber(maxRate, slotRate);
-
-        return slotRate.value <= maxRate.value;
     }
 
     function getChargingSchemeFinalPrice(ChargingScheme memory scheme, uint finishDate) private pure returns (uint, uint) {
@@ -359,8 +349,8 @@ contract Charging is Structure, ICharging {
         }
 
         uint elapsedTime;
-        scheme.finalPrice.precision = PRECISION;
-        scheme.finalRoamingPrice.precision = PRECISION;
+        //scheme.finalPrice.precision = PRECISION;
+        //scheme.finalRoamingPrice.precision = PRECISION;
 
         for ( uint i = 0; i < scheme.slotsUsed; i++ ) {
            
@@ -375,13 +365,13 @@ contract Charging is Structure, ICharging {
                             ? timeInSlot - (currentTime + timeInSlot - finishDate)
                             : timeInSlot;
 
-            scheme.finalPrice.value += (scheme.prices[i] * timeInSlot) / scheme.durations[i];
-            scheme.finalRoamingPrice.value += (scheme.roamingFees[i] * timeInSlot) / scheme.durations[i];
+            scheme.finalPricePrecision += (scheme.prices[i] * timeInSlot) / scheme.durations[i];
+            scheme.finalRoamingPricePrecision += (scheme.roamingFees[i] * timeInSlot) / scheme.durations[i];
             elapsedTime += timeInSlot;
 
         }
 
-        return (priceToWei(scheme.finalPrice), priceToWei(scheme.finalRoamingPrice));
+        return (priceToWei(scheme.finalPricePrecision), priceToWei(scheme.finalRoamingPricePrecision));
     }
 
     function possibleChargingTime(Chargelett memory C, uint startDate) private pure returns (uint) {
@@ -428,8 +418,8 @@ contract Charging is Structure, ICharging {
 
         ChargingScheme memory scheme;
         scheme.CPOaddress = T.cpo._address;
-        scheme.startCharge = startCharge;
-        scheme.targetCharge = T.ev.maxCapacity;
+        //scheme.startCharge = startCharge;
+        //scheme.targetCharge = T.ev.maxCapacity;
         scheme.chargeTime = chargeTime;
         scheme.startDate = startDate;
         scheme.maxTime = maxTime;
@@ -449,8 +439,8 @@ contract Charging is Structure, ICharging {
 
             ChargingScheme memory suggestion;
             suggestion.CPOaddress = scheme.CPOaddress;
-            suggestion.startCharge = startCharge;
-            suggestion.targetCharge = T.ev.maxCapacity;
+            //suggestion.startCharge = startCharge;
+            //suggestion.targetCharge = T.ev.maxCapacity;
             suggestion.chargeTime = chargeTime;
             suggestion.startDate = startDate;
             suggestion.maxTime = maxTime;
@@ -496,23 +486,6 @@ contract Charging is Structure, ICharging {
         return (time / RATE_SLOT_PERIOD) % RATE_SLOTS;
     }
 
-    function paddPrecisionNumber(PrecisionNumber memory a, PrecisionNumber memory b) private pure returns (PrecisionNumber memory, PrecisionNumber memory) {
-        PrecisionNumber memory first = PrecisionNumber({value: a.value, precision: a.precision});
-        PrecisionNumber memory second = PrecisionNumber({value: b.value, precision: b.precision});
-        
-        if ( first.precision > second.precision ) {
-            uint deltaPrecision = first.precision/second.precision;
-            second.value *= deltaPrecision;
-            second.precision *= deltaPrecision;
-        }
-        else {
-            uint deltaPrecision = second.precision/first.precision;
-            first.value *= deltaPrecision;
-            first.precision *= deltaPrecision;
-        }
-        return (first, second);
-    }
-
     function calculateChargeTimeInSeconds(uint charge, uint discharge, uint efficiency) private pure returns (uint) {
         uint secondsPrecision = PRECISION * charge * 100 / (discharge * efficiency);
         // Derived from: charge / (discharge * efficienct/100)
@@ -520,8 +493,8 @@ contract Charging is Structure, ICharging {
         return secondsRoundUp;
     }
 
-    function priceToWei(PrecisionNumber memory price) private pure returns (uint) {
-        return ((price.value * WEI_FACTOR) + (price.precision/2)) / price.precision;
+    function priceToWei(uint pricePrecision) private pure returns (uint) {
+        return ((pricePrecision * WEI_FACTOR) + (PRECISION/2)) / PRECISION;
     }
 
 }

@@ -11,9 +11,9 @@ contract Oracle is Structure, IOracle {
     /*
     * CONTRACT MANAGMENT
     */
-    address owner;
-    IRate rateInstance;
-    address rateAddress;
+    address private owner;
+    IRate private rateInstance;
+    address private rateAddress;
 
     constructor () {
         owner = msg.sender;
@@ -30,11 +30,11 @@ contract Oracle is Structure, IOracle {
     * VARIABLES
     */
 
-    mapping(bytes3 => uint[RATE_SLOTS]) currentRates;
-    mapping(bytes3 => uint) currentOracleDate;
+    mapping(bytes32 => uint[RATE_SLOTS]) currentRates;
+    mapping(bytes32 => uint) currentOracleDate;
 
-    mapping(bytes3 => uint[RATE_SLOTS]) nextRates;
-    mapping(bytes3 => uint) nextOracleDate;
+    mapping(bytes32 => uint[RATE_SLOTS]) nextRates;
+    mapping(bytes32 => uint) nextOracleDate;
 
     uint lastAutomaticRateRequest;
 
@@ -48,7 +48,7 @@ contract Oracle is Structure, IOracle {
     * PUBLIC FUNCTIONS
     */
 
-    function setRates(uint fetchedDate, bytes3 region, uint[RATE_SLOTS] calldata current, uint[RATE_SLOTS] calldata next) public {
+    function setRates(uint fetchedDate, bytes32 region, uint[RATE_SLOTS] calldata current, uint[RATE_SLOTS] calldata next) public {
         require(current.length == RATE_SLOTS && next.length == RATE_SLOTS, "1002");
         require(fetchedDate != 0 && fetchedDate <= block.timestamp, "1003");
 
@@ -98,7 +98,7 @@ contract Oracle is Structure, IOracle {
         emit RateRequest();
     }
 
-    function getOracleState(bytes3 region) public view returns (uint, uint, uint[RATE_SLOTS] memory, uint[RATE_SLOTS] memory) {
+    function getOracleState(bytes32 region) public view returns (uint, uint, uint[RATE_SLOTS] memory, uint[RATE_SLOTS] memory) {
         return (currentOracleDate[region], nextOracleDate[region], currentRates[region], nextRates[region]);
     }
 
@@ -106,7 +106,7 @@ contract Oracle is Structure, IOracle {
     * PRIVATE FUNCTIONS
     */
 
-    function transitionRate(bytes3 region, uint currentDate) private {
+    function transitionRate(bytes32 region, uint currentDate) private {
         if ( nextOracleDate[region] != 0 && currentDate >= nextOracleDate[region] ) {
             currentOracleDate[region] = nextOracleDate[region];
             nextOracleDate[region] = 0;
@@ -176,23 +176,6 @@ contract Oracle is Structure, IOracle {
         return (time / RATE_SLOT_PERIOD) % RATE_SLOTS;
     }
 
-    function paddPrecisionNumber(PrecisionNumber memory a, PrecisionNumber memory b) private pure returns (PrecisionNumber memory, PrecisionNumber memory) {
-        PrecisionNumber memory first = PrecisionNumber({value: a.value, precision: a.precision});
-        PrecisionNumber memory second = PrecisionNumber({value: b.value, precision: b.precision});
-        
-        if ( first.precision > second.precision ) {
-            uint deltaPrecision = first.precision/second.precision;
-            second.value *= deltaPrecision;
-            second.precision *= deltaPrecision;
-        }
-        else {
-            uint deltaPrecision = second.precision/first.precision;
-            first.value *= deltaPrecision;
-            first.precision *= deltaPrecision;
-        }
-        return (first, second);
-    }
-
     function calculateChargeTimeInSeconds(uint charge, uint discharge, uint efficiency) private pure returns (uint) {
         uint secondsPrecision = PRECISION * charge * 100 / (discharge * efficiency);
         // Derived from: charge / (discharge * efficienct/100)
@@ -200,9 +183,8 @@ contract Oracle is Structure, IOracle {
         return secondsRoundUp;
     }
 
-    function priceToWei(PrecisionNumber memory price) private pure returns (uint) {
-        return ((price.value * WEI_FACTOR) + (price.precision/2)) / price.precision;
+    function priceToWei(uint pricePrecision) private pure returns (uint) {
+        return ((pricePrecision * WEI_FACTOR) + (PRECISION/2)) / PRECISION;
     }
-
 
 }

@@ -11,9 +11,9 @@ contract Agreement is Structure, IAgreement {
     /*
     * CONTRACT MANAGMENT
     */
-    address owner;
-    IContract contractInstance;
-    address contractAddress;
+    address private owner;
+    IContract private contractInstance;
+    address private contractAddress;
 
     constructor () {
         owner = msg.sender;
@@ -30,7 +30,7 @@ contract Agreement is Structure, IAgreement {
     * VARIABLES
     */
 
-    uint nextAgreementId = 0;
+    uint private nextAgreementId;
 
     /*
     * PUBLIC FUNCTIONS
@@ -41,8 +41,7 @@ contract Agreement is Structure, IAgreement {
         require(EVaddress == tx.origin, "402");
         require(contractInstance.isEV(EVaddress), "402");
         require(contractInstance.isCPO(CPOaddress), "203");
-        require(agreementParameters.maxRate.precision == PRECISION, "506");
-        require(agreementParameters.maxRate.value > 0, "507");
+        require(agreementParameters.maxRatePrecision > 0, "507");
         require(agreementParameters.lengthInDays > 0, "508");
 
         Agreement memory currentAgreement = contractInstance.getAgreement(EVaddress, CPOaddress);

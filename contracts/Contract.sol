@@ -15,12 +15,12 @@ contract Contract is Structure, IContract {
     /*
     * CONTRACT MANAGMENT
     */
-    address owner;
-    IEntity entityInstance;
-    IAgreement agreementInstance;
-    IConnection connectionInstance;
-    IRate rateInstance;
-    ICharging chargingInstance;
+    address private owner;
+    IEntity private entityInstance;
+    IAgreement private agreementInstance;
+    IConnection private connectionInstance;
+    IRate private rateInstance;
+    ICharging private chargingInstance;
 
     constructor () {
         owner = msg.sender;
@@ -39,19 +39,19 @@ contract Contract is Structure, IContract {
     /*
     * VARIABLES
     */ 
-    mapping(address => CPO) CPOs;
-    mapping(address => CS) CSs;
-    mapping(address => EV) EVs;
+    mapping(address => CPO) private CPOs;
+    mapping(address => CS) private CSs;
+    mapping(address => EV) private EVs;
 
-    mapping(address => mapping(address => Agreement)) agreements; // EV -> CPO -> Agreement
+    mapping(address => mapping(address => Agreement)) private agreements; // EV -> CPO -> Agreement
 
-    mapping(address => mapping(address => Connection)) connections; // EV -> CS -> Connection
+    mapping(address => mapping(address => Connection)) private connections; // EV -> CS -> Connection
 
-    mapping(address => mapping(bytes3 => Rate)) rates; // CPO -> Region -> Rate
+    mapping(address => mapping(bytes32 => Rate)) private rates; // CPO -> Region -> Rate
 
-    mapping(address => mapping(address => ChargingScheme)) chargingSchemes; // EV -> CS -> CharginScheme
+    mapping(address => mapping(address => ChargingScheme)) private chargingSchemes; // EV -> CS -> CharginScheme
     
-    mapping(address => uint) deposits; // EV deposits
+    mapping(address => uint) private deposits; // EV deposits
 
     /*
     * EVENTS
@@ -68,7 +68,7 @@ contract Contract is Structure, IContract {
     event ConnectionMade(address indexed ev, address indexed cs, Connection connection);
     event Disconnection(address indexed ev, address indexed cs);
 
-    event NewRates(address indexed cpo, bytes3 region, Rate rates);
+    event NewRates(address indexed cpo, bytes32 region, Rate rates);
 
     event ChargingRequested(address indexed ev, address indexed cs, ChargingScheme scheme);
     event InssufficientDeposit(address indexed ev, address indexed cs);
@@ -115,6 +115,9 @@ contract Contract is Structure, IContract {
     /*function getTriplett(address EVaddress, address CSaddress) public view returns (Triplett memory) {
         return getTriplett(EVaddress, CSaddress, CSs[CSaddress].cpo);
     }*/
+    function getPrecision() public pure returns (uint) {
+        return PRECISION;
+    }
 
     function getAgreement(address EVaddress, address CPOaddress) public view returns (Agreement memory) {
         return agreements[EVaddress][CPOaddress];
@@ -130,10 +133,10 @@ contract Contract is Structure, IContract {
         return connections[EVaddress][CSaddress].EVconnected && connections[EVaddress][CSaddress].CSconnected;
     }
 
-    function getRate(address CPOaddress, bytes3 region) public view returns (Rate memory) {
+    function getRate(address CPOaddress, bytes32 region) public view returns (Rate memory) {
         return rates[CPOaddress][region];
     }
-    function transferToNewRates(address CPOaddress, bytes3 region) public {
+    function transferToNewRates(address CPOaddress, bytes32 region) public {
         rates[CPOaddress][region] = rateInstance.transferToNewRates(rates[CPOaddress][region], CPOs[CPOaddress].automaticRates);
     }
     function updateAutomaticRates() public {
@@ -151,10 +154,10 @@ contract Contract is Structure, IContract {
         ChargingScheme memory scheme = chargingSchemes[EVaddress][CSaddress];
         return scheme.smartCharging && scheme.CSaccepted && scheme.EVaccepted && !scheme.finished;
     }
-    function isRatesAvailable(address CPOaddress, bytes3 region) public view returns (bool) {
+    function isRatesAvailable(address CPOaddress, bytes32 region) public view returns (bool) {
         return rates[CPOaddress][region].current[0] != 0;
     }
-    function isRoamingAvailable(address CPOaddress, bytes3 region) public view returns (bool) {
+    function isRoamingAvailable(address CPOaddress, bytes32 region) public view returns (bool) {
         return rates[CPOaddress][region].currentRoaming != 0;
     }
     
@@ -166,7 +169,7 @@ contract Contract is Structure, IContract {
         CPOs[CPOaddress] = entityInstance.createCPO(CPOaddress, name, automaticRates);
         emit CPORegistered(CPOaddress);
     }
-    function registerCS(address CSaddress, address CPOaddress, bytes3 region, uint powerDischarge, bool hasRenewableEnergy) public {
+    function registerCS(address CSaddress, address CPOaddress, bytes32 region, uint powerDischarge, bool hasRenewableEnergy) public {
         CSs[CSaddress] = entityInstance.createCS(CSaddress, CPOaddress, region, powerDischarge, hasRenewableEnergy);
         emit CSRegistered(CSaddress, CPOaddress);
     }
@@ -211,13 +214,13 @@ contract Contract is Structure, IContract {
 
 
 
-    function setRates(address CPOaddress, bytes3 region, uint[RATE_SLOTS] calldata newRates, uint newRoaming, uint ratePrecision) public {
-        Rate memory rate = rateInstance.setRates(CPOaddress, region, newRates, newRoaming, ratePrecision);
+    function setRates(address CPOaddress, bytes32 region, uint[RATE_SLOTS] calldata newRates, uint newRoaming) public {
+        Rate memory rate = rateInstance.setRates(CPOaddress, region, newRates, newRoaming);
         rates[CPOaddress][region] = rate;
         emit NewRates(CPOaddress, region, rate);
     } 
-    function nextRoaming(address CPOaddress, bytes3 region, uint newRoaming, uint roamingPrecision) public {
-        Rate memory rate = rateInstance.nextRoaming(CPOaddress, region, newRoaming, roamingPrecision);
+    function nextRoaming(address CPOaddress, bytes32 region, uint newRoaming) public {
+        Rate memory rate = rateInstance.nextRoaming(CPOaddress, region, newRoaming);
         rates[CPOaddress][region] = rate;
         emit NewRates(CPOaddress, region, rate);
     }
@@ -339,23 +342,6 @@ contract Contract is Structure, IContract {
         return (time / RATE_SLOT_PERIOD) % RATE_SLOTS;
     }
 
-    function paddPrecisionNumber(PrecisionNumber memory a, PrecisionNumber memory b) private pure returns (PrecisionNumber memory, PrecisionNumber memory) {
-        PrecisionNumber memory first = PrecisionNumber({value: a.value, precision: a.precision});
-        PrecisionNumber memory second = PrecisionNumber({value: b.value, precision: b.precision});
-        
-        if ( first.precision > second.precision ) {
-            uint deltaPrecision = first.precision/second.precision;
-            second.value *= deltaPrecision;
-            second.precision *= deltaPrecision;
-        }
-        else {
-            uint deltaPrecision = second.precision/first.precision;
-            first.value *= deltaPrecision;
-            first.precision *= deltaPrecision;
-        }
-        return (first, second);
-    }
-
     function calculateChargeTimeInSeconds(uint charge, uint discharge, uint efficiency) private pure returns (uint) {
         uint secondsPrecision = PRECISION * charge * 100 / (discharge * efficiency);
         // Derived from: charge / (discharge * efficienct/100)
@@ -363,8 +349,8 @@ contract Contract is Structure, IContract {
         return secondsRoundUp;
     }
 
-    function priceToWei(PrecisionNumber memory price) private pure returns (uint) {
-        return ((price.value * WEI_FACTOR) + (price.precision/2)) / price.precision;
+    function priceToWei(uint pricePrecision) private pure returns (uint) {
+        return ((pricePrecision * WEI_FACTOR) + (PRECISION/2)) / PRECISION;
     }
 
 }
