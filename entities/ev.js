@@ -46,6 +46,13 @@ class EV extends Entity {
             this.web3.utils.toBigInt(nonce)
         ).send();
     }
+    async connectExperiment(CSaddress, nonce) {
+        return await this.contract.methods.connect(
+            this.account.address, 
+            CSaddress, 
+            this.web3.utils.toBigInt(nonce)
+        ).send({nonce: nonce});
+    }
 
     async disconnect(CSaddress) {
         return await this.contract.methods.disconnect(
