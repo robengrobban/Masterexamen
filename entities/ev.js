@@ -35,7 +35,7 @@ class EV extends Entity {
         return await this.contract.methods.proposeAgreement(
             this.account.address, 
             CPOaddress,
-            [[500, this.precision], false, true, 10] // AgreementProperties
+            [500, false, true, 10] // AgreementProperties
         ).send();
     }
 

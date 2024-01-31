@@ -52,8 +52,7 @@ class CPO extends Entity {
             this.account.address, 
             this.web3.utils.fromAscii("SE1"),
             rates,
-            roaming, 
-            this.precision
+            roaming
         ).send();
     }
 
@@ -61,8 +60,7 @@ class CPO extends Entity {
         return await this.contract.methods.nextRoaming(
             this.account.address, 
             this.web3.utils.fromAscii("SE1"),
-            roaming, 
-            this.precision
+            roaming
         ).send();
     }
 
