@@ -14,7 +14,10 @@ const contract_address = await fs.readFile("contracts/address/Oracle.address", "
 const contract = new web3.eth.Contract(abi, contract_address);
 contract.defaultAccount = account.address;
 
-console.log(await contract.methods.getOracleState(web3.utils.fromAscii("SE1")).call());
+function asciiToHex32(text) {
+    return this.web3.utils.asciiToHex(this.web3.utils.padRight(text, 32, "\0"));
+}
+console.log(await contract.methods.getOracleState(asciiToHex32("SE1")).call());
 
 contract.events.RateRequest({
     fromBlock: 'latest'
@@ -37,7 +40,7 @@ contract.events.RateRequest({
         const nextRates = await api.rates(priceFromKilloToPrecision, 60);
         api.moveDay(-1);
 
-        await contract.methods.setRates(getTime(), web3.utils.fromAscii(region[i]), currentRates, nextRates).send();
+        await contract.methods.setRates(getTime(), asciiToHex32(region[i]), currentRates, nextRates).send();
     }
 
     console.log("All new rates done...");

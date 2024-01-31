@@ -45,6 +45,10 @@ class Entity {
         });
     }
 
+    asciiToHex32(text) {
+        return this.web3.utils.asciiToHex(this.web3.utils.padRight(text, 32, "\0"));
+    }
+
     async connectContract() {
         let abi = JSON.parse(await fs.readFile("contracts/abi/Contract.abi", "utf-8"));
         let contract_address = await fs.readFile("contracts/address/Contract.address", "utf-8");
@@ -118,7 +122,7 @@ class Entity {
     async getRate(address, region) {
         return await this.contract.methods.getRate(
             address,
-            this.web3.utils.fromAscii(region)
+            this.asciiToHex32(region)
         ).call();
     }
 

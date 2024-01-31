@@ -80,6 +80,17 @@ if (false) {
     await car.connect(station.account.address, nonce);
 }
 
+if (false) {
+    station.listen('Disconnection').on('data', log => {
+        console.log("CS disconnection event: ", log.returnValues);
+    });
+    car.listen('Disconnection').on('data', log => {
+        console.log("EV disconnection event: ", log.returnValues);
+    });
+
+    console.log("EV disconnecting from CS...");
+    await car.disconnect(station.account.address);
+}
 
 if (true) {
     let count = 0;
@@ -88,21 +99,28 @@ if (true) {
         count++;
         console.log(count);
     });*/
-    station.listen('ChargingRequested').on('data', async log => {
+    /*station.listen('ChargingRequested').on('data', async log => {
         //console.log("CS charging request ", log.returnValues);
         count++;
         console.log(count);
     });
+    /*car.listen('ConnectionMade').on('data', log => {
+        //console.log("EV got connection event: ", log.returnValues.connection.nonce);
+        count++;
+        console.log(count);
+    });*/
     const nonce_count = Number(await car.web3.eth.getTransactionCount(car.account.address));
     console.log(nonce_count);
     for ( let i = 0; i < 1000; i++ ) {
-        if ( i % 200 == 0 ) {
-            await new Promise(r => setTimeout(r, 1000));
-            console.log("Just slept for 1s");
-        }
+        //if ( i % 500 == 0 ) {
+        //    await new Promise(r => setTimeout(r, 1000));
+        //    console.log("Just slept");
+        //}
         //console.log(i,"Scheduling smart charging...");
         //car.scheduleSmartChargingExperiment(station.account.address, operator.account.address, nonce_count+i);
         console.log(i,"EV requests charging...");
-        car.requestChargingExperiment(1000, station.account.address, operator.account.address, car.getTime() + 30, nonce_count+i);
+        car.requestChargingExperiment(1000, station.account.address, operator.account.address, car.getTime() + 60, nonce_count+i);
+        //console.log(i,"EV sends connection...");
+        //car.connectExperiment(station.account.address, nonce_count+i);
     }
 }

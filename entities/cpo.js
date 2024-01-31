@@ -6,7 +6,7 @@ class CPO extends Entity {
      * Variables
      */
 
-    name = "VTNFL"
+    name = "VATTENFALL"
     rateSlots = 60;
 
     /**
@@ -23,7 +23,7 @@ class CPO extends Entity {
     async register(automaticRates) {
         return await this.contract.methods.registerCPO(
             this.account.address,
-            this.web3.utils.fromAscii(this.name),
+            this.asciiToHex32(this.name),
             automaticRates
         ).send();
     }
@@ -32,7 +32,7 @@ class CPO extends Entity {
         return await this.contract.methods.registerCS( 
             CSaddress,
             this.account.address,
-            this.web3.utils.fromAscii("SE1"),
+            this.asciiToHex32("SE1"),
             powerDischarge,
             hasRenewableEnergy
         ).send();
@@ -50,7 +50,7 @@ class CPO extends Entity {
     async registerNewRates(rates, roaming) {
         return await this.contract.methods.setRates(
             this.account.address, 
-            this.web3.utils.fromAscii("SE1"),
+            this.asciiToHex32("SE1"),
             rates,
             roaming
         ).send();
@@ -59,11 +59,10 @@ class CPO extends Entity {
     async registerNextRoaming(roaming) {
         return await this.contract.methods.nextRoaming(
             this.account.address, 
-            this.web3.utils.fromAscii("SE1"),
+            this.asciiToHex32("SE1"),
             roaming
         ).send();
     }
-
 
     generateRates() {
         let rates = [];
