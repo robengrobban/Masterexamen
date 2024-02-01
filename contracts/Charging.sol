@@ -30,7 +30,7 @@ contract Charging is Structure, ICharging {
     * VARIABLES
     */
 
-    uint private nextSchemeId = 0;
+    uint private nextSchemeId;
 
     /*
     * PUBLIC FUNCTIONS

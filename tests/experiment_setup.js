@@ -91,8 +91,24 @@ if (false) {
     console.log("EV disconnecting from CS...");
     await car.disconnect(station.account.address);
 }
+if (false) {
+    // Make connection
+    station.listen('ConnectionMade').on('data', log => {
+        console.log("CS got connection event: ", log.returnValues);
+    });
+    car.listen('ConnectionMade').on('data', log => {
+        console.log("EV got connection event: ", log.returnValues);
+    });
 
-if (true) {
+    let nonce = station.generateNonce();
+    console.log("EV connects to CS and gets NONCE: ", nonce);
+    console.log("CS sends connection...");
+    await station.connect(car.account.address, nonce);
+    console.log("EV sends connection...");
+    await car.connect(station.account.address, nonce);
+}
+
+if (false) {
     let count = 0;
     /*car.listen("SmartChargingScheduled").on('data', async log => {
         //console.log("EV new smart charging schedule...", log.returnValues);
@@ -103,7 +119,7 @@ if (true) {
         //console.log("CS charging request ", log.returnValues);
         count++;
         console.log(count);
-    });
+    });*/
     /*car.listen('ConnectionMade').on('data', log => {
         //console.log("EV got connection event: ", log.returnValues.connection.nonce);
         count++;
@@ -111,11 +127,11 @@ if (true) {
     });*/
     const nonce_count = Number(await car.web3.eth.getTransactionCount(car.account.address));
     console.log(nonce_count);
-    for ( let i = 0; i < 1000; i++ ) {
-        //if ( i % 500 == 0 ) {
-        //    await new Promise(r => setTimeout(r, 1000));
-        //    console.log("Just slept");
-        //}
+    const tps = 100;
+    const workload = 2000;
+    const startTime = Date.now();
+    for ( let i = 0; i < workload; i++ ) {
+        await new Promise(r => setTimeout(r, 1000/tps));
         //console.log(i,"Scheduling smart charging...");
         //car.scheduleSmartChargingExperiment(station.account.address, operator.account.address, nonce_count+i);
         console.log(i,"EV requests charging...");
@@ -123,4 +139,16 @@ if (true) {
         //console.log(i,"EV sends connection...");
         //car.connectExperiment(station.account.address, nonce_count+i);
     }
+    
+    const endTime = Date.now();
+    console.log("--- Summary ---")
+    console.log("Workload", workload);
+
+    console.log("Targeted tps", tps);
+    console.log("Expected time", workload*(1000/tps), "ms");
+    console.log("Expected time", (workload*(1000/tps))/1000, "s");
+
+    console.log("Actual tps", workload/((endTime-startTime)/1000));
+    console.log("Total time", endTime-startTime, "ms");
+    console.log("Total time", (endTime-startTime)/1000, "s");
 }

@@ -120,8 +120,9 @@ contract Rate is Structure, IRate {
         rate.currentRoaming = rate.nextRoaming;
         rate.startDate = rate.changeDate;
 
-        uint[RATE_SLOTS] memory empty;
-        rate.next = empty;
+        //uint[RATE_SLOTS] memory empty;
+        //rate.next = empty;
+        delete rate.next;
         rate.nextRoaming = 0;
         rate.changeDate = 0;
 

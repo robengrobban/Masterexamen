@@ -90,6 +90,8 @@ interface Structure {
     struct ChargingScheme {
         uint id;
 
+        bytes32 region;
+
         address CPOaddress; // Address of which CPO is used for rates
         bool roaming; // If this charging scheme is of type roaming
         bool smartCharging; // True if the scheme originated from a smart charging request
@@ -110,8 +112,6 @@ interface Structure {
         uint startDate; // Unix time for when charging starts
         uint endDate; // Unix time for when charging should end
         uint finishDate; // Unix time for when charing actually end
-        
-        bytes32 region;
 
         uint pricePrecision;
         uint priceInWei;

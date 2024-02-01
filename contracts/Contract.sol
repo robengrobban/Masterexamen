@@ -165,7 +165,7 @@ contract Contract is Structure, IContract {
     * CONTRACT USER INTERFACES
     */ 
 
-    function registerCPO(address CPOaddress, bytes5 name, bool automaticRates) public {
+    function registerCPO(address CPOaddress, bytes32 name, bool automaticRates) public {
         CPOs[CPOaddress] = entityInstance.createCPO(CPOaddress, name, automaticRates);
         emit CPORegistered(CPOaddress);
     }
