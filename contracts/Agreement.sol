@@ -77,8 +77,10 @@ contract Agreement is Structure, IAgreement {
         require(!agreement.accepted, "504");
         require(agreement.id == agreementId, "505");
 
-        Agreement memory deleted;
-        return deleted;
+        //Agreement memory deleted;
+        //return deleted;
+        delete agreement;
+        return agreement;
     }
 
     function respondAgreement(address EVaddress, address CPOaddress, bool accepted, uint agreementId) public view returns (Agreement memory) {
@@ -97,8 +99,10 @@ contract Agreement is Structure, IAgreement {
             agreement.accepted = accepted;
             return agreement;
         }
-        Agreement memory deleted;
-        return deleted;    
+        //Agreement memory deleted;
+        //return deleted;
+        delete agreement;
+        return agreement;
     }
 
     /*
