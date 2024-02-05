@@ -102,6 +102,7 @@ contract Connection is Structure, IConnection {
         require(connection.EVconnected || connection.CSconnected, "605");
 
         //Connection memory deleted;
+        //return deleted;
         delete connection;
         return connection;
     }
