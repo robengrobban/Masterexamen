@@ -15,7 +15,7 @@ contract Contract is Structure, IContract {
     /*
     * CONTRACT MANAGMENT
     */
-    address private owner;
+    address private immutable owner;
     IEntity private entityInstance;
     IAgreement private agreementInstance;
     IConnection private connectionInstance;

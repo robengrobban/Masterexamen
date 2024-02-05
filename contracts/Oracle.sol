@@ -11,7 +11,7 @@ contract Oracle is Structure, IOracle {
     /*
     * CONTRACT MANAGMENT
     */
-    address private owner;
+    address private immutable owner;
     IRate private rateInstance;
     address private rateAddress;
 

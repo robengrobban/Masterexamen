@@ -12,7 +12,7 @@ contract Rate is Structure, IRate {
     /*
     * CONTRACT MANAGMENT
     */
-    address private owner;
+    address private immutable owner;
     IContract private contractInstance;
     address private contractAddress;
     IOracle private oracleInstance;

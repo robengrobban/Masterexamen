@@ -11,7 +11,7 @@ contract Agreement is Structure, IAgreement {
     /*
     * CONTRACT MANAGMENT
     */
-    address private owner;
+    address private immutable owner;
     IContract private contractInstance;
     address private contractAddress;
 
