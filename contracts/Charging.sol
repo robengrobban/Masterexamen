@@ -324,18 +324,18 @@ contract Charging is Structure, ICharging {
 
         return scheme;
     }
-    function slotDetails(uint startTime, uint elapsedTime, Agreement memory agreement, Rate memory rate) private pure returns (bool, uint, uint) {
-        uint currentTime = startTime + elapsedTime;
+    function slotDetails(uint startDate, uint elapsedTime, Agreement memory agreement, Rate memory rate) private pure returns (bool, uint, uint) {
+        uint currentDate = startDate + elapsedTime;
 
-        uint currentRate = (rate.changeDate != 0 && currentTime >= rate.changeDate) 
-                            ? rate.next[getRateSlot(currentTime)]
-                            : rate.current[getRateSlot(currentTime)];
+        uint currentRate = (rate.changeDate != 0 && currentDate >= rate.changeDate) 
+                            ? rate.next[getRateSlot(currentDate)]
+                            : rate.current[getRateSlot(currentDate)];
         
-        uint nextRateSlot = getNextRateSlot(currentTime); // Unix time for when the next rate slot starts.
+        uint nextRateSlot = getNextRateSlot(currentDate); // Unix time for when the next rate slot starts.
 
         bool useSlot = currentRate <= agreement.parameters.maxRatePrecision;
 
-        uint timeInSlot = nextRateSlot - currentTime;
+        uint timeInSlot = nextRateSlot - currentDate;
 
         return (useSlot, timeInSlot, currentRate);
     }
