@@ -53,19 +53,31 @@ if (false) {
     console.log("EV status: " + await car.isRegistered() + " " + await car.isEV());
     console.log("CPO status: " + await operator.isRegistered() + " " + await operator.isCPO());
     console.log("CS status: " + await station.isRegistered() + " " + await station.isCS());
+}
+if (false) {
+    // Register rates CPO1 manual
+    operator.listen('NewRates').on('data', log => {
+        console.log("New rates: ", log.returnValues);
+    });
 
-    if (true) {
-        // Register rates
-        operator.listen('NewRates').on('data', log => {
-            console.log("New rates: ", log.returnValues);
-        });
+    console.log("Registring new rates...");
+    let rates = operator.generateRates();
+    let roaming = operator.generateRoaming();
+    await operator.registerNewRates(rates, roaming);
+}
+if (false) {
+    // Bootstrap rates CPO2 to be automatic
+    console.log("Prompring for new rates");
+    console.log(await operator2.contract.methods.updateAutomaticRates().send());
 
-        console.log("Registring new rates...");
-        let rates = operator.generateRates();
-        let roaming = operator.generateRoaming();
-        await operator.registerNewRates(rates, roaming);
-    }
-
+    // Register roaming rates
+    operator2.listen('NewRates').on('data', log => {
+        console.log("New rates: ", log.returnValues);
+    });
+    console.log("Next roaming");
+    await operator2.registerNextRoaming(operator2.generateRoaming());
+}
+if (false) {
     // Propose agreement
     operator.listen('AgreementProposed').on('data', async log => {
         console.log("New agreement arrived: ", log.returnValues);
