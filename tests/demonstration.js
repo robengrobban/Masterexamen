@@ -84,6 +84,7 @@ if (false) {
         console.log("ev: ", log.returnValues.ev);
         console.log("id: ", log.returnValues.agreement.id);
         console.log("Answering agreement...");
+        // Automatically accept
         await operator.respondAgreement(log.returnValues.ev, true, log.returnValues.agreement.id);
     });
     car.listen('AgreementResponded').on('data', log => {
@@ -93,7 +94,8 @@ if (false) {
 
     console.log("Proposing agreement...");
     await car.proposeAgreement(operator.account.address);
-
+}
+if (false) {
     // Make connection
     station.listen('ConnectionMade').on('data', log => {
         console.log("CS got connection event: ", log.returnValues);
@@ -120,30 +122,6 @@ if (false) {
 
     console.log("EV disconnecting from CS...");
     await car.disconnect(station.account.address);
-}
-if (false) {
-    // Register rates
-    operator.listen('NewRates').on('data', log => {
-        console.log("New rates: ", log.returnValues);
-    });
-
-    console.log("Registring new rates...");
-    let rates = operator.generateRates();
-    let roaming = operator.generateRoaming();
-    await operator.registerNewRates(rates, roaming);
-}
-if (false) {
-    // Prompt for automatic rates
-    console.log("Prompring for new rates");
-    console.log(await car.contract.methods.updateAutomaticRates().send());
-}
-if (false) {
-    // Prepare for automatic rates
-    operator2.listen('NewRates').on('data', log => {
-        console.log("New rates: ", log.returnValues);
-    });
-    console.log("Next roaming");
-    await operator2.registerNextRoaming(operator2.generateRoaming());
 }
 if (false) {
     // Calculate charging price
