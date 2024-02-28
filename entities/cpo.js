@@ -69,10 +69,10 @@ class CPO extends Entity {
         for (let i = 0; i < this.rateSlots; i++) {
             //rates[i] = this.web3.utils.toBigInt( Math.floor(this.pricePerWattHoursToWattSeconds((-0.000001*i**2 + 0.0001*i + 0.0001)*this.precision)) );
             if ( i % 2 == 0 ) {
-                rates[i] = this.web3.utils.toBigInt(Math.floor( (this.pricePerWattHoursToWattSeconds(0.001)*this.precision)+0.5 ));
+                rates[i] = this.web3.utils.toBigInt(Math.floor( (this.pricePerWattHoursToWattSeconds(0.001)*this.precision)+0.5 )*100);
             }
             else {
-                rates[i] = this.web3.utils.toBigInt(Math.floor( (this.pricePerWattHoursToWattSeconds(0.002)*this.precision)+0.5 ));
+                rates[i] = this.web3.utils.toBigInt(Math.floor( (this.pricePerWattHoursToWattSeconds(0.002)*this.precision)+0.5 )*100);
             }
             //rates[i] = this.web3.utils.toBigInt(Math.floor( (this.pricePerWattHoursToWattSeconds(0.0005)*this.precision)+0.5 ));
         }
@@ -80,7 +80,7 @@ class CPO extends Entity {
     }
 
     generateRoaming() {
-        return this.web3.utils.toBigInt(Math.floor( (this.pricePerWattHoursToWattSeconds(0.0001)*this.precision)+0.5 ));
+        return this.web3.utils.toBigInt(Math.floor( (this.pricePerWattHoursToWattSeconds(0.0001)*this.precision)+0.5 )*100);
     }
 
     pricePerWattHoursToWattSeconds(price) {

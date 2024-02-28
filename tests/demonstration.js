@@ -124,12 +124,7 @@ if (false) {
     await car.disconnect(station.account.address);
 }
 if (false) {
-    // Calculate charging price
-    //console.log(await car.estimateChargingPrice(station.account.address));
-    console.log(await car.getChargingScheme(station.account.address, operator2.account.address));
-}
-if (false) {
-    // Listenings
+    // Request charging
     car.listen('ChargingAcknowledged').on('data', async log => {
         console.log("EV got start charging event ", log.returnValues);
     });
@@ -138,7 +133,7 @@ if (false) {
     });
     station.listen('ChargingRequested').on('data', async log => {
         console.log("CS charging request ", log.returnValues);
-        // Start charging
+        // Acknowledge charging request
         if (true) {
             let schemeId = log.returnValues.scheme.id;
             let EVaddress = log.returnValues.ev;
@@ -147,7 +142,6 @@ if (false) {
         }
     });
 
-    // Request charging
     console.log("EV requests charging...");
     await car.requestCharging(1000, station.account.address, operator2.account.address, car.getTime() + 30);
 }

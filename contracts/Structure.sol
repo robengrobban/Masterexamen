@@ -20,8 +20,7 @@ uint constant RATE_SLOT_PERIOD = RATE_CHANGE_IN_SECONDS / RATE_SLOTS;   // This 
                                                                         // are the amount of seconds that needs to pass in order for the full charge
                                                                         // rate price to be accounted for. 
 
-uint constant WEI_FACTOR = 100;     // This says that the price to pay is per 100 WEI. Meaning, if the price gets calculated to 4.3, it would mean
-                                    // that 430 WEI is the price. Higher value will grant higher precision, but this works fine for testing.
+uint constant WEI_FACTOR = 1;
 
 uint constant PRECISION = 1000000000;           // Affects the precision on calculation, as they are all integer calulcations.
 

@@ -95,7 +95,7 @@ function priceFromKilloToPrecision(price) {
     price = pricePerWattHoursToWattSeconds(price);
     price *= 1000000000;
     price += 0.5;
-    return web3.utils.toBigInt(Math.floor(price));
+    return web3.utils.toBigInt(Math.floor(price)*100);
 }
 function getTime() {
     return Math.floor(Date.now() / 1000);
