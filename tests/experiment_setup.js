@@ -11,6 +11,19 @@ await station.connectContract();
 await operator.connectContract();
 
 if (false) {
+    console.log("DEBUG EV: ", await car.getEV());
+    console.log("DEBUG CPO: ", await operator.getCPO());
+    console.log("DEBUG CS: ", await station.getCS());
+    console.log("DEBUG AGREEMENT: ", await car.getAgreement(car.account.address, operator.account.address));
+    console.log("DEBUG CONNECTION: ", await car.getConnection(car.account.address, station.account.address));
+    console.log("DEBUG CHARGING SCHEME: ", await car.getCharging(car.account.address, station.account.address));
+    console.log("DEBUG RATE: ", await operator.getRate(operator.account.address, "SE1"));
+    console.log("EV MONEY: ", await car.balance());
+    console.log("EV DEPOSIT: ", await car.getDeposit());
+    console.log("CPO MONEY: ", await operator.balance());
+}
+
+if (false) {
     // Register entities
     operator.listen('CPORegistered').on('data', log => {
         console.log("Newly registered CPO: ", log.returnValues);
@@ -107,8 +120,31 @@ if (false) {
     console.log("EV sends connection...");
     await car.connect(station.account.address, nonce);
 }
-
 if (false) {
+    // Listenings
+    car.listen('ChargingAcknowledged').on('data', async log => {
+        console.log("EV got start charging event ", log.returnValues);
+    });
+    station.listen('ChargingAcknowledged').on('data', log => {
+        console.log("CS got start charging event ", log.returnValues);
+    });
+    station.listen('ChargingRequested').on('data', async log => {
+        console.log("CS charging request ", log.returnValues);
+        // Start charging
+        if (false) {
+            let schemeId = log.returnValues.scheme.id;
+            let EVaddress = log.returnValues.ev;
+            console.log("CS is responding to charging request ", schemeId);
+            await station.acknowledgeCharging(EVaddress, schemeId);
+        }
+    });
+
+    // Request charging
+    console.log("EV requests charging...");
+    await car.requestCharging(1000, station.account.address, operator.account.address, car.getTime() + 30);
+}
+
+if (true) {
     let count = 0;
     /*car.listen("SmartChargingScheduled").on('data', async log => {
         //console.log("EV new smart charging schedule...", log.returnValues);
@@ -130,8 +166,29 @@ if (false) {
     const tps = 100;
     const workload = 2000;
     const startTime = Date.now();
+
+    /*let sent = 0;
+    let lastSent = Date.now();
+    let sendRate = 1000/tps;
+    while ( sent < workload ) {
+        let current = Date.now();
+        let diff = current-lastSent;
+        let toSend = Math.floor(diff/sendRate);
+        for ( let i = 0; i < toSend && sent < workload; i++ ) {
+            console.log(
+                sent,
+                "EV requests charging...",
+                car.requestChargingExperiment(1000, station.account.address, operator.account.address, car.getTime() + 60, nonce_count+sent)
+            ); // This is weird, the requests are not sent when they are suppose to... they are sent after
+            sent++;
+        }
+        if ( toSend > 0 ) {
+            lastSent = current;
+        }
+    }*/
+
     for ( let i = 0; i < workload; i++ ) {
-        await new Promise(r => setTimeout(r, 1000/tps));
+        //await new Promise(r => setTimeout(r, 1000/tps));
         //console.log(i,"Scheduling smart charging...");
         //car.scheduleSmartChargingExperiment(station.account.address, operator.account.address, nonce_count+i);
         console.log(i,"EV requests charging...");
