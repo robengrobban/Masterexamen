@@ -1,6 +1,7 @@
 import { EV } from '../entities/ev.js';
 import { CS } from '../entities/cs.js';
 import { CPO } from '../entities/cpo.js';
+import { Worker } from 'worker_threads';
 
 const car = new EV('0xd0a5e7b124eb5c1d327f7c19c988bb57979637043e52db48683da62900973b96');
 const station = new CS('0x59fe2715b3dae7ea659aa4d4466d1dbeda7f1d7835fbace6c0da14c303018d30');
@@ -94,6 +95,7 @@ if (false) {
 }
 
 if (false) {
+    // Disconnect
     station.listen('Disconnection').on('data', log => {
         console.log("CS disconnection event: ", log.returnValues);
     });
@@ -144,8 +146,14 @@ if (false) {
     await car.requestCharging(1000, station.account.address, operator.account.address, car.getTime() + 30);
 }
 
-if (true) {
+if (false) {
     let count = 0;
+    const worker = new Worker("./tests/worker.js");
+    worker.postMessage({
+        type: 'init',
+        ev: "0xd0a5e7b124eb5c1d327f7c19c988bb57979637043e52db48683da62900973b96",
+    });
+    await new Promise(r => setTimeout(r, 1000));
     /*car.listen("SmartChargingScheduled").on('data', async log => {
         //console.log("EV new smart charging schedule...", log.returnValues);
         count++;
@@ -167,7 +175,8 @@ if (true) {
     const workload = 2000;
     const startTime = Date.now();
 
-    /*let sent = 0;
+    let gas = 1000000;
+    let sent = 0;
     let lastSent = Date.now();
     let sendRate = 1000/tps;
     while ( sent < workload ) {
@@ -175,27 +184,33 @@ if (true) {
         let diff = current-lastSent;
         let toSend = Math.floor(diff/sendRate);
         for ( let i = 0; i < toSend && sent < workload; i++ ) {
-            console.log(
-                sent,
-                "EV requests charging...",
-                car.requestChargingExperiment(1000, station.account.address, operator.account.address, car.getTime() + 60, nonce_count+sent)
-            ); // This is weird, the requests are not sent when they are suppose to... they are sent after
+            console.log(sent, "EV requests charging...");
+            worker.postMessage({
+                type: 'send',
+                nonce: nonce_count+sent,
+                value: 1000,
+                cs: station.account.address,
+                cpo: operator.account.address,
+                time: car.getTime() + 60,
+                gas: gas++
+            });
+            //car.requestChargingExperiment(1000, station.account.address, operator.account.address, car.getTime() + 60, nonce_count+sent);
             sent++;
         }
         if ( toSend > 0 ) {
             lastSent = current;
         }
-    }*/
+    }
 
-    for ( let i = 0; i < workload; i++ ) {
-        //await new Promise(r => setTimeout(r, 1000/tps));
+    /*for ( let i = 0; i < workload; i++ ) {
+        await new Promise(r => setTimeout(r, 1000/tps));
         //console.log(i,"Scheduling smart charging...");
         //car.scheduleSmartChargingExperiment(station.account.address, operator.account.address, nonce_count+i);
         console.log(i,"EV requests charging...");
         car.requestChargingExperiment(1000, station.account.address, operator.account.address, car.getTime() + 60, nonce_count+i);
         //console.log(i,"EV sends connection...");
         //car.connectExperiment(station.account.address, nonce_count+i);
-    }
+    }*/
     
     const endTime = Date.now();
     console.log("--- Summary ---")

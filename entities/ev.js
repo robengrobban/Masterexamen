@@ -53,6 +53,13 @@ class EV extends Entity {
             this.web3.utils.toBigInt(nonce)
         ).send({nonce: nonce});
     }
+    async connectExperiment2(CSaddress, nonce, gas) {
+        return await this.contract.methods.connect(
+            this.account.address, 
+            CSaddress, 
+            this.web3.utils.toBigInt(nonce)
+        ).send({nonce: nonce, gas: gas});
+    }
 
     async disconnect(CSaddress) {
         return await this.contract.methods.disconnect(
@@ -100,6 +107,16 @@ class EV extends Entity {
             this.wattHoursToWattSeconds(this.currentCharge),
             targetCharge
         ).send({value: value, nonce: nonce});
+    }
+    async requestChargingExperiment2(value, CSaddress, CPOaddress, startTime, nonce, gas, targetCharge = this.wattHoursToWattSeconds(this.maxCapacity)) {
+        return await this.contract.methods.requestCharging(
+            this.account.address,
+            CSaddress,
+            CPOaddress,
+            startTime,
+            this.wattHoursToWattSeconds(this.currentCharge),
+            targetCharge
+        ).send({value: value, nonce: nonce, gas: gas});
     }
 
     async stopCharging(CSaddress) {
