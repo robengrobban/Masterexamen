@@ -50,11 +50,11 @@ contract Oracle is Structure, IOracle {
 
     function setRates(uint fetchedDate, bytes32 region, uint[RATE_SLOTS] calldata current, uint[RATE_SLOTS] calldata next) public {
         require(current.length == RATE_SLOTS && next.length == RATE_SLOTS, "1002");
-        require(fetchedDate != 0 && fetchedDate <= block.timestamp, "1003");
+        require(fetchedDate != 0, "1003 (a)");
 
         // Make sure rates are within current period (that fetchedDate has the same start period as currentDate)
         uint currentDate = getNextRateChangeAtTime(block.timestamp-RATE_CHANGE_IN_SECONDS);
-        require(getNextRateChangeAtTime(fetchedDate-RATE_CHANGE_IN_SECONDS) == currentDate, "1003");
+        require(getNextRateChangeAtTime(fetchedDate-RATE_CHANGE_IN_SECONDS) == currentDate, "1003 (b)");
 
         // Advance rates if necessary   
         transitionRate(region, currentDate);

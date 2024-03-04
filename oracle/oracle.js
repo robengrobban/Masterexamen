@@ -15,7 +15,7 @@ const contract = new web3.eth.Contract(abi, contract_address);
 contract.defaultAccount = account.address;
 
 function asciiToHex32(text) {
-    return this.web3.utils.asciiToHex(this.web3.utils.padRight(text, 32, "\0"));
+    return web3.utils.asciiToHex(web3.utils.padRight(text, 32, "\0"));
 }
 console.log(await contract.methods.getOracleState(asciiToHex32("SE1")).call());
 
@@ -51,10 +51,10 @@ function generateRates() {
     let rates = [];
     for (let i = 0; i < 60; i++) {
         if ( i % 2 == 0 ) {
-            rates[i] = web3.utils.toBigInt(Math.floor( (pricePerWattHoursToWattSeconds(0.001)*1000000000)+0.5 ));
+            rates[i] = web3.utils.toBigInt(Math.floor( (pricePerWattHoursToWattSeconds(0.001)*1000000000*100)+0.5 ));
         }
         else {
-            rates[i] = web3.utils.toBigInt(Math.floor( (pricePerWattHoursToWattSeconds(0.002)*1000000000)+0.5 ));
+            rates[i] = web3.utils.toBigInt(Math.floor( (pricePerWattHoursToWattSeconds(0.002)*1000000000*100)+0.5 ));
         }
     }
     return rates;
@@ -63,10 +63,10 @@ function generateRates2() {
     let rates = [];
     for (let i = 0; i < 60; i++) {
         if ( i % 2 == 0 ) {
-            rates[i] = web3.utils.toBigInt(Math.floor( (pricePerWattHoursToWattSeconds(0.003)*1000000000)+0.5 ));
+            rates[i] = web3.utils.toBigInt(Math.floor( (pricePerWattHoursToWattSeconds(0.003)*1000000000*100)+0.5 ));
         }
         else {
-            rates[i] = web3.utils.toBigInt(Math.floor( (pricePerWattHoursToWattSeconds(0.004)*1000000000)+0.5 ));
+            rates[i] = web3.utils.toBigInt(Math.floor( (pricePerWattHoursToWattSeconds(0.004)*1000000000*100)+0.5 ));
         }
     }
     return rates;

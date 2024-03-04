@@ -39,6 +39,14 @@ class EV extends Entity {
         ).send();
     }
 
+    async revertAgreement(CPOaddress, agreementId) {
+        return await this.contract.methods.revertProposedAgreement(
+            this.account.address,
+            CPOaddress,
+            agreementId
+        ).send();
+    }
+
     async connect(CSaddress, nonce) {
         return await this.contract.methods.connect(
             this.account.address, 
