@@ -223,4 +223,6 @@ if (false) {
     console.log("Actual tps", workload/((endTime-startTime)/1000));
     console.log("Total time", endTime-startTime, "ms");
     console.log("Total time", (endTime-startTime)/1000, "s");
+
+    process.exit();
 }
