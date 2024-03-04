@@ -11,9 +11,9 @@ contract Entity is Structure, IEntity {
     /*
     * CONTRACT MANAGMENT
     */
-    address owner;
-    IContract contractInstance;
-    address contractAddress;
+    address private immutable owner;
+    IContract private contractInstance;
+    address private contractAddress;
 
     constructor () {
         owner = msg.sender;
@@ -30,7 +30,7 @@ contract Entity is Structure, IEntity {
     * PUBLIC FUNCTIONS
     */
 
-    function createCPO(address CPOaddress, bytes5 name, bool automaticRates) public view returns (CPO memory) {
+    function createCPO(address CPOaddress, bytes32 name, bool automaticRates) public view returns (CPO memory) {
         require(msg.sender == contractAddress, "102");
         require(CPOaddress == tx.origin, "202");
         require(!contractInstance.isRegistered(CPOaddress), "201");
@@ -43,7 +43,7 @@ contract Entity is Structure, IEntity {
         });
     }
 
-    function createCS(address CSaddress, address CPOaddress, bytes3 region, uint powerDischarge, bool hasRenewableEnergy) public view returns (CS memory) {
+    function createCS(address CSaddress, address CPOaddress, bytes32 region, uint powerDischarge, bool hasRenewableEnergy) public view returns (CS memory) {
         require(msg.sender == contractAddress, "102");
         require(CPOaddress == tx.origin, "302");
         require(contractInstance.isCPO(CPOaddress), "202");

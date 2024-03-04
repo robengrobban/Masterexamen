@@ -14,7 +14,10 @@ const contract_address = await fs.readFile("contracts/address/Oracle.address", "
 const contract = new web3.eth.Contract(abi, contract_address);
 contract.defaultAccount = account.address;
 
-console.log(await contract.methods.getOracleState(web3.utils.fromAscii("SE1")).call());
+function asciiToHex32(text) {
+    return web3.utils.asciiToHex(web3.utils.padRight(text, 32, "\0"));
+}
+console.log(await contract.methods.getOracleState(asciiToHex32("SE1")).call());
 
 contract.events.RateRequest({
     fromBlock: 'latest'
@@ -37,7 +40,7 @@ contract.events.RateRequest({
         const nextRates = await api.rates(priceFromKilloToPrecision, 60);
         api.moveDay(-1);
 
-        await contract.methods.setRates(getTime(), web3.utils.fromAscii(region[i]), currentRates, nextRates).send();
+        await contract.methods.setRates(getTime(), asciiToHex32(region[i]), currentRates, nextRates).send();
     }
 
     console.log("All new rates done...");
@@ -48,10 +51,10 @@ function generateRates() {
     let rates = [];
     for (let i = 0; i < 60; i++) {
         if ( i % 2 == 0 ) {
-            rates[i] = web3.utils.toBigInt(Math.floor( (pricePerWattHoursToWattSeconds(0.001)*1000000000)+0.5 ));
+            rates[i] = web3.utils.toBigInt(Math.floor( (pricePerWattHoursToWattSeconds(0.001)*1000000000*100)+0.5 ));
         }
         else {
-            rates[i] = web3.utils.toBigInt(Math.floor( (pricePerWattHoursToWattSeconds(0.002)*1000000000)+0.5 ));
+            rates[i] = web3.utils.toBigInt(Math.floor( (pricePerWattHoursToWattSeconds(0.002)*1000000000*100)+0.5 ));
         }
     }
     return rates;
@@ -60,10 +63,10 @@ function generateRates2() {
     let rates = [];
     for (let i = 0; i < 60; i++) {
         if ( i % 2 == 0 ) {
-            rates[i] = web3.utils.toBigInt(Math.floor( (pricePerWattHoursToWattSeconds(0.003)*1000000000)+0.5 ));
+            rates[i] = web3.utils.toBigInt(Math.floor( (pricePerWattHoursToWattSeconds(0.003)*1000000000*100)+0.5 ));
         }
         else {
-            rates[i] = web3.utils.toBigInt(Math.floor( (pricePerWattHoursToWattSeconds(0.004)*1000000000)+0.5 ));
+            rates[i] = web3.utils.toBigInt(Math.floor( (pricePerWattHoursToWattSeconds(0.004)*1000000000*100)+0.5 ));
         }
     }
     return rates;
@@ -92,7 +95,7 @@ function priceFromKilloToPrecision(price) {
     price = pricePerWattHoursToWattSeconds(price);
     price *= 1000000000;
     price += 0.5;
-    return web3.utils.toBigInt(Math.floor(price));
+    return web3.utils.toBigInt(Math.floor(price)*100);
 }
 function getTime() {
     return Math.floor(Date.now() / 1000);

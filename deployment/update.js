@@ -87,13 +87,13 @@ const entity_address = await read("Entity");
 const agreement_address = await read("Agreement");
 const connection_address = await read("Connection");
 const rate_address = await read("Rate");
-const charging_address = await deploy("Charging");
-const oracle_address = await read("Oracle");
+const charging_address = await read("Charging");
+const oracle_address = await deploy("Oracle");
 
 await connectMulti("Contract", entity_address, agreement_address, connection_address, rate_address, charging_address);
-await connect("Charging", contract_address);
-//await connect("Oracle", rate_address);
-//await connect2("Rate", contract_address, oracle_address)
+//await connect("Charging", contract_address);
+await connect("Oracle", rate_address);
+await connect2("Rate", contract_address, oracle_address)
 
 console.log("Done");
 process.exit();

@@ -1,6 +1,7 @@
 import { EV } from '../entities/ev.js';
 import { CS } from '../entities/cs.js';
 import { CPO } from '../entities/cpo.js';
+import { Worker } from 'worker_threads';
 
 const car = new EV('0xd0a5e7b124eb5c1d327f7c19c988bb57979637043e52db48683da62900973b96');
 const station = new CS('0x59fe2715b3dae7ea659aa4d4466d1dbeda7f1d7835fbace6c0da14c303018d30');
@@ -9,6 +10,19 @@ const operator = new CPO('0x7efa5e9cc6abc293f1f11072ea93c57c2ae5ecc4dc358ef77d9d
 await car.connectContract();
 await station.connectContract();
 await operator.connectContract();
+
+if (false) {
+    console.log("DEBUG EV: ", await car.getEV());
+    console.log("DEBUG CPO: ", await operator.getCPO());
+    console.log("DEBUG CS: ", await station.getCS());
+    console.log("DEBUG AGREEMENT: ", await car.getAgreement(car.account.address, operator.account.address));
+    console.log("DEBUG CONNECTION: ", await car.getConnection(car.account.address, station.account.address));
+    console.log("DEBUG CHARGING SCHEME: ", await car.getCharging(car.account.address, station.account.address));
+    console.log("DEBUG RATE: ", await operator.getRate(operator.account.address, "SE1"));
+    console.log("EV MONEY: ", await car.balance());
+    console.log("EV DEPOSIT: ", await car.getDeposit());
+    console.log("CPO MONEY: ", await operator.balance());
+}
 
 if (false) {
     // Register entities
@@ -80,8 +94,66 @@ if (false) {
     await car.connect(station.account.address, nonce);
 }
 
-if (true) {
+if (false) {
+    // Disconnect
+    station.listen('Disconnection').on('data', log => {
+        console.log("CS disconnection event: ", log.returnValues);
+    });
+    car.listen('Disconnection').on('data', log => {
+        console.log("EV disconnection event: ", log.returnValues);
+    });
+
+    console.log("EV disconnecting from CS...");
+    await car.disconnect(station.account.address);
+}
+if (false) {
+    // Make connection
+    station.listen('ConnectionMade').on('data', log => {
+        console.log("CS got connection event: ", log.returnValues);
+    });
+    car.listen('ConnectionMade').on('data', log => {
+        console.log("EV got connection event: ", log.returnValues);
+    });
+
+    let nonce = station.generateNonce();
+    console.log("EV connects to CS and gets NONCE: ", nonce);
+    console.log("CS sends connection...");
+    await station.connect(car.account.address, nonce);
+    console.log("EV sends connection...");
+    await car.connect(station.account.address, nonce);
+}
+if (false) {
+    // Listenings
+    car.listen('ChargingAcknowledged').on('data', async log => {
+        console.log("EV got start charging event ", log.returnValues);
+    });
+    station.listen('ChargingAcknowledged').on('data', log => {
+        console.log("CS got start charging event ", log.returnValues);
+    });
+    station.listen('ChargingRequested').on('data', async log => {
+        console.log("CS charging request ", log.returnValues);
+        // Start charging
+        if (false) {
+            let schemeId = log.returnValues.scheme.id;
+            let EVaddress = log.returnValues.ev;
+            console.log("CS is responding to charging request ", schemeId);
+            await station.acknowledgeCharging(EVaddress, schemeId);
+        }
+    });
+
+    // Request charging
+    console.log("EV requests charging...");
+    await car.requestCharging(1000, station.account.address, operator.account.address, car.getTime() + 30);
+}
+
+if (false) {
     let count = 0;
+    const worker = new Worker("./tests/worker.js");
+    worker.postMessage({
+        type: 'init',
+        ev: "0xd0a5e7b124eb5c1d327f7c19c988bb57979637043e52db48683da62900973b96",
+    });
+    await new Promise(r => setTimeout(r, 1000));
     /*car.listen("SmartChargingScheduled").on('data', async log => {
         //console.log("EV new smart charging schedule...", log.returnValues);
         count++;
@@ -92,23 +164,63 @@ if (true) {
         count++;
         console.log(count);
     });*/
-    car.listen('ConnectionMade').on('data', log => {
-        console.log("EV got connection event: ", log.returnValues.connection.nonce);
+    /*car.listen('ConnectionMade').on('data', log => {
+        //console.log("EV got connection event: ", log.returnValues.connection.nonce);
         count++;
         console.log(count);
-    });
+    });*/
     const nonce_count = Number(await car.web3.eth.getTransactionCount(car.account.address));
     console.log(nonce_count);
-    for ( let i = 0; i < 5000; i++ ) {
-        if ( i % 100 == 0 ) {
-            //await new Promise(r => setTimeout(r, 1000));
-            //console.log("Just slept for 1s");
+    const tps = 100;
+    const workload = 2000;
+    const startTime = Date.now();
+
+    let gas = 1000000;
+    let sent = 0;
+    let lastSent = Date.now();
+    let sendRate = 1000/tps;
+    while ( sent < workload ) {
+        let current = Date.now();
+        let diff = current-lastSent;
+        let toSend = Math.floor(diff/sendRate);
+        for ( let i = 0; i < toSend && sent < workload; i++ ) {
+            console.log(sent, "EV requests charging...");
+            worker.postMessage({
+                type: 'send',
+                nonce: nonce_count+sent,
+                value: 1000,
+                cs: station.account.address,
+                cpo: operator.account.address,
+                time: car.getTime() + 60,
+                gas: gas++
+            });
+            //car.requestChargingExperiment(1000, station.account.address, operator.account.address, car.getTime() + 60, nonce_count+sent);
+            sent++;
         }
+        if ( toSend > 0 ) {
+            lastSent = current;
+        }
+    }
+
+    /*for ( let i = 0; i < workload; i++ ) {
+        await new Promise(r => setTimeout(r, 1000/tps));
         //console.log(i,"Scheduling smart charging...");
         //car.scheduleSmartChargingExperiment(station.account.address, operator.account.address, nonce_count+i);
-        //console.log(i,"EV requests charging...");
-        //car.requestChargingExperiment(1000, station.account.address, operator.account.address, car.getTime() + 30, nonce_count+i);
-        console.log(i,"EV sends connection...");
-        car.connectExperiment(station.account.address, nonce_count+i);
-    }
+        console.log(i,"EV requests charging...");
+        car.requestChargingExperiment(1000, station.account.address, operator.account.address, car.getTime() + 60, nonce_count+i);
+        //console.log(i,"EV sends connection...");
+        //car.connectExperiment(station.account.address, nonce_count+i);
+    }*/
+    
+    const endTime = Date.now();
+    console.log("--- Summary ---")
+    console.log("Workload", workload);
+
+    console.log("Targeted tps", tps);
+    console.log("Expected time", workload*(1000/tps), "ms");
+    console.log("Expected time", (workload*(1000/tps))/1000, "s");
+
+    console.log("Actual tps", workload/((endTime-startTime)/1000));
+    console.log("Total time", endTime-startTime, "ms");
+    console.log("Total time", (endTime-startTime)/1000, "s");
 }

@@ -11,9 +11,9 @@ contract Connection is Structure, IConnection {
     /*
     * CONTRACT MANAGMENT
     */
-    address owner;
-    IContract contractInstance;
-    address contractAddress;
+    address private immutable owner;
+    IContract private contractInstance;
+    address private contractAddress;
 
     constructor () {
         owner = msg.sender;
@@ -101,8 +101,10 @@ contract Connection is Structure, IConnection {
         Connection memory connection = contractInstance.getConnection(EVaddress, CSaddress);
         require(connection.EVconnected || connection.CSconnected, "605");
 
-        Connection memory deleted;
-        return deleted;
+        //Connection memory deleted;
+        //return deleted;
+        delete connection;
+        return connection;
     }
 
     /*

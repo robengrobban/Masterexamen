@@ -22,16 +22,16 @@ interface IContract is Structure {
     function getConnection(address, address) external view returns (Connection memory);
     function isConnected(address, address) external view returns (bool);
 
-    function getRate(address, bytes3) external view returns (Rate memory);
-    function transferToNewRates(address, bytes3) external;
+    function getRate(address, bytes32) external view returns (Rate memory);
+    function transferToNewRates(address, bytes32) external;
     function updateAutomaticRates() external;
 
     function isCharging(address, address) external view returns (bool);
     function getCharging(address, address) external view returns (ChargingScheme memory);
     function isSmartCharging(address, address) external view returns (bool);
 
-    function isRatesAvailable(address, bytes3) external view returns (bool);
-    function isRoamingAvailable(address, bytes3) external view returns (bool);
+    function isRatesAvailable(address, bytes32) external view returns (bool);
+    function isRoamingAvailable(address, bytes32) external view returns (bool);
 
     function getDeposit(address) external view returns (uint);
 
