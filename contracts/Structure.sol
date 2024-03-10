@@ -25,11 +25,6 @@ uint constant WEI_FACTOR = 1;
 uint constant PRECISION = 1000000000;           // Affects the precision on calculation, as they are all integer calulcations.
 
 interface Structure {
-    
-    /*struct PrecisionNumber {
-        uint value;
-        uint precision;
-    }*/
 
     struct CPO {
         address _address;
